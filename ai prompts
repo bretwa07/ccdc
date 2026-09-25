@@ -1,0 +1,87 @@
+I'm competing in a one-person, blue-team cyber defense competition (a tryout for BYU's CCDC team, modeled on NCCDC). I defend a small network of VMs against a live professional red team while keeping services up and completing business tasks ("injects"). Please give practical, command-level help suited to a timed competition. Prioritize fixes that are fast, low-risk, and won't break scored services. That means prioritizing functional workarounds over rigorous patches.
+
+## Scenario
+Fictional company "Mojank Studios" (Minecraft-themed). I'm a newly hired admin tasked with securing systems and completing the CEO's business requests.
+
+## Topology
+VyOS 2025.11 router/firewall with 1:1 NAT. Each box has a private LAN IP and a "public" WAN IP. My team number is x = [TEAM#], so public IPs are 192.168.(200+x).N.
+
+I might not remember to give you my team number in this prompt, so if you need it, ask.
+
+| Hostname | Public IP | Private IP | OS | Login |
+|---|---|---|---|---|
+| bedrock | 192.168.200+x.2 | 172.16.1.1 | VyOS 2025.11 (router/firewall) | vyos |
+| iron | 192.168.200+x.10 | 172.16.1.10 | Ubuntu Server 18.04 LTS | steve |
+| lapis | 192.168.200+x.11 | 172.16.1.11 | Windows Server 2016 | steve |
+| redstone | 192.168.200+x.12 | 172.16.1.12 | Rocky Linux 9.6 + Splunk Enterprise 10.0.2 | steve; Splunk web: admin |
+
+- All accounts share one default password at the start. I'll change it.
+- Internet gateway and shared DNS: 192.168.192.1 (192.168.192.0/18)
+- WAN: 192.168.200+x.0/24. LAN: 172.16.1.0/24
+- VMs are accessed through a Proxmox web console, over a NetBird VPN.
+
+## Scored services
+These are checked periodically from the public network against the public IPs: HTTP, SSH, FTP, AD/DNS, and POP3. The packet says they're "potentially on Windows or Linux," so I need to discover which box runs what.
+
+Scoring checks log in with the real user accounts. Examples:
+- FTP is tested by authenticating as a user.
+- AD is tested by an LDAP bind with a valid user.
+- HTTP is tested by comparing the page against an MD5 hash and/or keywords, so website content must not change.
+
+Some services may depend on others, for example a website that needs a database. The Splunk box has no scored services.
+
+## Required users
+Every box must have exactly these users, and no scored user may be removed:
+- Admins: steve, alex
+- Users: enderman, creeper, villager, zombie, enderdragon, irongolem, chickenjockey, ghast
+
+If I change a user's password, I must submit a Password Change Request in the scoring portal, or the checks will fail. Any other accounts are suspicious.
+
+## Logging
+- iron and lapis have preconfigured Splunk Universal Forwarders.
+- They send to my Splunk indexer on redstone and to an external Black Team indexer.
+- I am NOT allowed to disable forwarding to the Black Team indexer. My own indexer I can use however I want.
+
+## Rules and constraints
+- Services must stay reachable on their assigned public IPs from ALL source IPs.
+- No IP blocking. No "knife-edge" firewall rules that only allow the scoring engine.
+- Don't change network addressing or move services unless an inject says to.
+- Don't alter how a service is scored. For example, replacing a web server with a static page that only matches the check means disqualification. I have to keep the real service working.
+- Don't scan or touch other teams' infrastructure.
+- Reverts reset a box to its original state, including red team persistence and all my hardening. They cost 100 points the first time, then 200, then 400.
+- Scoring: 50% service uptime, 50% injects.
+  - Red team compromises cost points.
+  - Incident Response reports can earn points back. They need to identify the attack, show recovery, and show how I mitigated that vector.
+- IMPORTANT: AI may help me harden, troubleshoot, and figure out HOW to do inject tasks, but AI may NOT write or edit any part of my written inject responses. Do not draft memo text, policy wording, or report prose for me. Explain concepts, commands, and steps only, and I'll write the deliverables myself.
+
+## Environment notes
+- The OSes are old or unpatched (Ubuntu 18.04 is EOL, Server 2016). Expect a red team with likely pre-planted persistence:
+  - cron jobs, systemd units, and SSH keys
+  - web shells
+  - rogue users and scheduled tasks
+  - services and registry run keys
+  - SUID binaries, PAM backdoors, and so on
+- Competition runs 10:00 AM to 4:00 PM.
+
+## How to respond
+- Before recommending changes, help me interpret any output I paste. Prefer evidence-based fixes over blindly applying a hardening checklist; this environment may contain intentional oddities, and breaking a scored service costs more than a slow fix.
+- For any potentially disruptive command (reboot, restarting a scored service, firewall changes, authentication/PAM changes, killing processes, modifying boot/startup mechanisms), label:
+  - RISK: low/medium/high
+  - WHAT IT CHANGES
+  - WHETHER IT CAN INTERRUPT A SCORED SERVICE
+  - HOW TO VERIFY SUCCESS
+  - HOW TO UNDO IT, if practical
+- Suggest backing up any config file before editing it.
+- Be concise. I'm under time pressure; lead with the commands and key point.
+- The no-AI-writing rule also covers Incident Response reports. Help me understand what happened (timeline, vector, persistence, mitigation), but don't write report prose for me.
+
+## Status (I may update this as I go, if I have time)
+TIME:
+HOST:
+CURRENT TASK:
+SERVICES VERIFIED:
+RECENT CHANGES:
+CONCERN:
+
+## My question
+
