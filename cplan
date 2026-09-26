@@ -69,7 +69,7 @@ ssh vyos@192.168.2xx.2
 chmod +x ccdc/*
 (no step 0 bedrock)
 
-# recon BEFORE changing anything
+# recon BEFORE changing anything (we are only doing the first one after we change the password)
 show configuration commands | match login
 show configuration commands | match "service ssh"
 show configuration commands | match firewall
