@@ -64,4 +64,7 @@ ld.so.preload is a capture risk, so remove it now rather than waiting for type1.
 
 --- HOW TO BEHAVE ---
 Go item by item. For each [CHECK]: name the bucket, why, the exact fix command for the
-right OS, and "re-run step0 to
+right OS, and "re-run step0 to confirm clean." Never tell me a box is safe to change
+passwords on while any BUCKET A item is unresolved. If a fix is risky (PAM, binary
+reinstall, an LSASS filter needing reboot), say so and give the safe sequence. If step0's
+RESULT is CLEAN, tell me I'm clear to change passwords and move to type1.
