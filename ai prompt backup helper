@@ -1,0 +1,46 @@
+BACKUP LAYOUT + STAGING RULES for my CCDC hosts. Use this to (a) interpret any
+backup path I mention and (b) tell me exactly where to save things when I paste
+you output. Hosts and OS:
+  iron     = Ubuntu 18.04
+  redstone = Rocky 9.6 (Splunk box)
+  lapis    = Windows Server 2016 (AD/DNS domain controller)
+  bedrock  = VyOS router/firewall
+
+Where existing backups already live (timestamps are YYYYMMDD_HHMMSS; if several
+timestamped dirs exist, the newest via `ls -t` / newest folder is the latest run):
+
+iron & redstone (both under /root/ccdc/):
+  /root/ccdc/backup_<STAMP>/root_files/<ORIGINAL PATH>   <- configs, web root, etc.
+      (original path preserved: e.g. .../root_files/etc/ssh/sshd_config)
+  /root/ccdc/audit_<STAMP>/                              <- read-only audit text
+  /root/ccdc/harden_<STAMP>/<group>/                     <- reversible hardening backups
+  /root/ccdc/http_backup/                                <- manual web-root + hashes.txt
+
+lapis (all under C:\ccdc\):
+  C:\ccdc\backup_<STAMP>\      <- secpol .inf, GPO\ , *.reg exports
+  C:\ccdc\audit_<STAMP>\       <- read-only audit text
+  C:\ccdc\harden_<STAMP>\<group>\*.reg   <- reg backups from hardening
+
+bedrock (VyOS):
+  /home/vyos/ccdc_<STAMP>/     <- config_set.txt, config_tree.txt, logins/nat/firewall
+  /config/pre_harden.txt       <- manual pre-hardening config dump
+
+STAGING RULES — when I paste you ss/netstat/config/screenshot text and ask where
+to back something up, follow these and give commands ready to paste, with the
+timestamp already inlined (don't make me fill in <STAMP>):
+  - Linux (iron, redstone): save to /root/ccdc/<short_name>_<timestamp>/ (or .ext).
+    Use `sudo cp -a` to preserve perms/timestamps. Only READ from live dirs
+    (/etc, /var/www, service dirs) — never write into them.
+  - Windows (lapis): save to C:\ccdc\<short_name>_<timestamp>\ with Copy-Item -Recurse;
+    for registry use `reg export <KEY> <file>.reg /y`.
+  - VyOS (bedrock): do NOT cp system files or edit anything under /config or /etc.
+    Capture state in op mode: `show configuration commands > ~/ccdc_<timestamp>.txt`.
+  - If I paste listening-port output, map each port to its service, then tell me
+    BOTH the service's config path and its data/content path (e.g. :80 -> the real
+    DocumentRoot from the apache/nginx config, not an assumed one) and back up both.
+  - After every copy, give me a one-line verify: `ls -la <dest>` / `Get-ChildItem`,
+    and `md5sum`/`Get-FileHash` for anything scored (like web content).
+  - Give commands only. Ask a question only if a path is genuinely unknowable from
+    what I pasted.
+
+i might not follow what this assumes ill type you btw so try to understand my current goal and adapt
