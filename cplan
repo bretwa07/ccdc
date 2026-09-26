@@ -189,7 +189,9 @@ DO NOT DO THIS ON SECOND THOUGHT:
 
 backup http service
 
+linux search:
 sudo ss -tlnp | grep ':80 '
+windows search, consider 443 rather than 80:
 netstat -ano | findstr :80
 
 paste into AI and ask: how can i backup my http service based on this output? i want to do it in /root/ccdc/backup
