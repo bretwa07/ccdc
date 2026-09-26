@@ -69,14 +69,15 @@ ssh vyos@192.168.2xx.2
 chmod +x ccdc/*
 (no step 0 bedrock)
 
+# --- config mode (#) ---
+configure
+
 # recon BEFORE changing anything (we are only doing the first one after we change the password)
 run show configuration commands | match login
 run show configuration commands | match "service ssh"
 run show configuration commands | match firewall
 run show configuration commands | match nat
 
-# --- config mode (#) ---
-configure
 
 # set the vyos password (the ONLY correct way — no chpasswd, no passwd -l)
 set system login user vyos authentication plaintext-password 'kobaryoR?'
@@ -103,7 +104,8 @@ REDSTONE in a new wsl:
 
 scp -r ccdc steve@192.168.2xx.12:~/ccdc
 
-REDSTONE ssh steve@192.168.2xx.12
+REDSTONE
+ssh steve@192.168.2xx.12
 
 
 chmod +x ccdc/*
