@@ -104,7 +104,6 @@ REDSTONE in a new wsl:
 
 scp -r ccdc steve@192.168.2xx.12:~/ccdc
 
-REDSTONE
 ssh steve@192.168.2xx.12
 
 
