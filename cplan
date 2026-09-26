@@ -23,7 +23,7 @@ steve,kobaryoS?,alex,kobaryoA?,enderman,kobaryoE?,creeper,kobaryoG?,villager,kob
 steve,kobaryoS? alex,kobaryoA? enderman,kobaryoE? creeper,kobaryoG? villager,kobaryoN? zombie,kobaryoR? enderdragon,kobaryoE? irongolem,kobaryoI? chickenjockey,kobaryoF? ghast,kobaryoG?
 
 Set-ExecutionPolicy -Scope Process Bypass -Force
-run step 0
+.\step0_check.ps1
 
 this needs to be run in powershell:
 
