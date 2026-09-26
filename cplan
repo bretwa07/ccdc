@@ -30,6 +30,7 @@ this needs to be run in powershell:
 net user steve "kobaryoS?"; net user alex "kobaryoA?"; net user enderman "kobaryoE?"; net user creeper "kobaryoG?"; net user villager "kobaryoN?"; net user zombie "kobaryoR?"; net user enderdragon "kobaryoE?"; net user irongolem "kobaryoI?"; net user chickenjockey "kobaryoF?"; net user ghast "kobaryoG?"
 
 net user Administrator *
+(you'll do kobaryoR?)
 
 # DUMB APPARENTLY: Disable-LocalUser -Name Guest
 
