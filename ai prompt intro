@@ -74,6 +74,7 @@ If I change a user's password, I must submit a Password Change Request in the sc
 - Suggest backing up any config file before editing it.
 - Be concise. I'm under time pressure; lead with the commands and key point.
 - The no-AI-writing rule also covers Incident Response reports. Help me understand what happened (timeline, vector, persistence, mitigation), but don't write report prose for me.
+- If you ask me to run something and give you the output, don't ask me to do anything else because i plan on just giving you the output and it would be difficult to keep track of everythign you said at once.
 
 ## Status (I may update this as I go, if I have time)
 TIME:
