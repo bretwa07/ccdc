@@ -5,11 +5,11 @@ the protocol is just change passwords and then step 1 hardens. skip windows file
 
 vpn first
 
-rdp into 192.168.2xx.11
+rdp into 192.168.204.11
 
 sign in as steve iyearn4theMines!
 
-example: 192.168.2xx.11
+example: 192.168.204.11
 
 copy and paste the files in lapis
 
@@ -20,8 +20,16 @@ Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "-Command", "Set-L
 for updating scoring passwords depending on accepted format:
 
 *
-steve,kobaryoS?,alex,kobaryoA?,enderman,kobaryoE?,creeper,kobaryoG?,villager,kobaryoN?,zombie,kobaryoR?,enderdragon,kobaryoE?,irongolem,kobaryoI?,chickenjockey,kobaryoF?,ghast,kobaryoG?
-
+steve,kobaryoS?
+alex,kobaryoA?
+enderman,kobaryoE?
+creeper,kobaryoG?
+villager,kobaryoN?
+zombie,kobaryoR?
+enderdragon,kobaryoE?
+irongolem,kobaryoI?
+chickenjockey,kobaryoF?
+ghast,kobaryoG?
 *
 steve,kobaryoS? alex,kobaryoA? enderman,kobaryoE? creeper,kobaryoG? villager,kobaryoN? zombie,kobaryoR? enderdragon,kobaryoE? irongolem,kobaryoI? chickenjockey,kobaryoF? ghast,kobaryoG?
 
@@ -42,9 +50,9 @@ now change graded passwords
 
 IRON from wsl do linux:
 
-scp -r ccdc steve@192.168.2xx.10:~/ccdc
+scp -r ccdc steve@192.168.204.10:~/ccdc
 
-ssh steve@192.168.2xx.10
+ssh steve@192.168.204.10
 
 iyearn4theMines!
 
@@ -68,8 +76,8 @@ sudo netfilter-persistent save
 
 BEDROCK in a new wsl: 
 
-scp -r ccdc vyos@192.168.2xx.2:~/ccdc
-ssh vyos@192.168.2xx.2
+scp -r ccdc vyos@192.168.204.2:~/ccdc
+ssh vyos@192.168.204.2
 chmod +x ccdc/*
 (no step 0 bedrock)
 
@@ -108,9 +116,9 @@ show system login users
 REDSTONE in a new wsl: 
 
 
-scp -r ccdc steve@192.168.2xx.12:~/ccdc
+scp -r ccdc steve@192.168.204.12:~/ccdc
 
-ssh steve@192.168.2xx.12
+ssh steve@192.168.204.12
 
 
 chmod +x ccdc/*
@@ -183,9 +191,9 @@ just rm them all lwk
 now do the step 1 on windows
 
 run this and give to AI. it will figure out which box has which service:
-nmap -sV 192.168.2xx.10-12
+nmap -sV 192.168.204.10-12
 
-change splunk password: http://192.168.2xx.12:8000 (admin, iyearn4theMines!)
+change splunk password: http://192.168.204.12:8000 (admin, iyearn4theMines!)
 
 DO NOT DO THIS ON SECOND THOUGHT:
 ./linuxkillbashrc.sh on all linux
