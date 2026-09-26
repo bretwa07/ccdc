@@ -116,7 +116,7 @@ printf '%s\n' 'root:kobaryoR?' 'steve:kobaryoS?' 'alex:kobaryoA?' 'enderman:koba
 sudo passwd -l root
 
 ./redstone_type1.sh
-
+(you might need to cd into ccdc)
 
 BACK TO WINDOWS
 now check for unrecognized users on windows:
