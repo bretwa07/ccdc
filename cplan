@@ -1,7 +1,7 @@
 remember to update passwords
 
 we are skipping step 0's sadly :(
-the protocol is just change passwords and then step 1 hardens.
+the protocol is just change passwords and then step 1 hardens. skip windows files till end probably.
 
 vpn first
 
@@ -35,6 +35,8 @@ net user steve "kobaryoS?"; net user alex "kobaryoA?"; net user enderman "kobary
 net user Administrator *
 (you'll do kobaryoR?)
 
+now change graded passwords
+
 # DUMB APPARENTLY: Disable-LocalUser -Name Guest
 
 
@@ -50,9 +52,11 @@ iyearn4theMines!
 
 chmod +x ccdc/*
 
-./step0_check.sh
+sudo ./step0_check.sh
 
 printf '%s\n' 'root:kobaryoR?' 'steve:kobaryoS?' 'alex:kobaryoA?' 'enderman:kobaryoE?' 'creeper:kobaryoG?' 'villager:kobaryoN?' 'zombie:kobaryoR?' 'enderdragon:kobaryoE?' 'irongolem:kobaryoI?' 'chickenjockey:kobaryoF?' 'ghast:kobaryoG?' | sudo chpasswd
+
+now change graded passwords
 
 sudo passwd -l root
 
@@ -82,6 +86,8 @@ run show configuration commands | match nat
 # set the vyos password (the ONLY correct way — no chpasswd, no passwd -l)
 set system login user vyos authentication plaintext-password 'kobaryoR?'
 
+now change graded passwords
+
 # delete any login user that isn't 'vyos' (repeat per bad user)
 # delete system login user BADUSER
 
@@ -109,13 +115,15 @@ ssh steve@192.168.2xx.12
 
 chmod +x ccdc/*
 
-./step0_check.sh
+sudo ./step0_check.sh
 
 printf '%s\n' 'root:kobaryoR?' 'steve:kobaryoS?' 'alex:kobaryoA?' 'enderman:kobaryoE?' 'creeper:kobaryoG?' 'villager:kobaryoN?' 'zombie:kobaryoR?' 'enderdragon:kobaryoE?' 'irongolem:kobaryoI?' 'chickenjockey:kobaryoF?' 'ghast:kobaryoG?' | sudo chpasswd
 
+now change graded passwords
+
 sudo passwd -l root
 
-./redstone_type1.sh
+sudo ./redstone_type1.sh
 (you might need to cd into ccdc)
 
 BACK TO WINDOWS
@@ -168,6 +176,11 @@ Go through ssh keys now:
 sudo find / -name "authorized_keys*" 2>/dev/null
 
 just rm them all lwk
+
+now do the step 1 on windows
+
+run this and give to AI. it will figure out which box has which service:
+nmap -sV 192.168.2xx.10-12
 
 change splunk password: http://192.168.2xx.12:8000 (admin, iyearn4theMines!)
 
