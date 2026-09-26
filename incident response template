@@ -1,0 +1,23 @@
+What it was:
+[Plain description of the malicious thing. Name the account/file/rule/process exactly.]
+
+How I found it:
+[The command or tool that surfaced it + the telltale output. e.g. "awk UID-0 check on /etc/passwd
+showed a second UID-0 account 'svc_bak' not on the allowed list." Reference the screenshot.]
+
+Impact:
+[What it could do / did. e.g. "Root-equivalent local account = full control of iron, incl. scored HTTP/FTP."]
+
+4. Containment:
+[Immediate limit before full cleanup. e.g. "Locked the account, killed its live sessions."]
+
+5. Eradication
+[Exact removal step + command. e.g. "userdel -r svc_bak; removed its cron in /etc/cron.d/bak."]
+
+6. Recovery / verification
+[How you confirmed the service/box is clean AND scored checks are green. e.g. "Re-ran UID-0 check =
+only root; HTTP + FTP green for 3 intervals."]
+
+7. Prevention (recurrence)
+[What stops it coming back. e.g. "Rotated all passwords + filed PCRs, removed the SSH key that let
+them re-add it, audited cron/sudoers, enabled auth logging to Splunk."]
