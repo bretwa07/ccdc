@@ -1,0 +1,200 @@
+remember to update passwords
+
+vpn first
+
+rdp into 192.168.2xx.11
+
+sign in as steve iyearn4theMines!
+
+example: 192.168.2xx.11
+
+copy and paste the files in lapis
+
+optional, become admin in a terminal:
+Start-Process powershell -Verb RunAs -ArgumentList "-NoExit", "-Command", "Set-Location '$PWD'"
+
+
+for updating scoring passwords depending on accepted format:
+
+*
+steve,kobaryoS?,alex,kobaryoA?,enderman,kobaryoE?,creeper,kobaryoG?,villager,kobaryoN?,zombie,kobaryoR?,enderdragon,kobaryoE?,irongolem,kobaryoI?,chickenjockey,kobaryoF?,ghast,kobaryoG?
+
+*
+steve,kobaryoS? alex,kobaryoA? enderman,kobaryoE? creeper,kobaryoG? villager,kobaryoN? zombie,kobaryoR? enderdragon,kobaryoE? irongolem,kobaryoI? chickenjockey,kobaryoF? ghast,kobaryoG?
+
+Set-ExecutionPolicy -Scope Process Bypass -Force
+run step 0
+
+this needs to be run in powershell:
+
+net user steve "kobaryoS?"; net user alex "kobaryoA?"; net user enderman "kobaryoE?"; net user creeper "kobaryoG?"; net user villager "kobaryoN?"; net user zombie "kobaryoR?"; net user enderdragon "kobaryoE?"; net user irongolem "kobaryoI?"; net user chickenjockey "kobaryoF?"; net user ghast "kobaryoG?"
+
+net user Administrator *
+
+# DUMB APPARENTLY: Disable-LocalUser -Name Guest
+
+
+IRON from wsl do linux:
+
+scp -r ccdc steve@192.168.2xx.10:~/ccdc
+
+ssh steve@192.168.2xx.10
+
+iyearn4theMines!
+
+
+
+chmod +x ccdc/*
+
+./step0_check.sh
+
+printf '%s\n' 'root:kobaryoR?' 'steve:kobaryoS?' 'alex:kobaryoA?' 'enderman:kobaryoE?' 'creeper:kobaryoG?' 'villager:kobaryoN?' 'zombie:kobaryoR?' 'enderdragon:kobaryoE?' 'irongolem:kobaryoI?' 'chickenjockey:kobaryoF?' 'ghast:kobaryoG?' | sudo chpasswd
+
+sudo passwd -l root
+
+./iron_type1.sh
+
+sudo iptables -I INPUT -p tcp --dport 6200 -j DROP
+
+sudo netfilter-persistent save
+
+BEDROCK in a new wsl: 
+
+scp -r ccdc vyos@192.168.2xx.2:~/ccdc
+ssh vyos@192.168.2xx.2
+chmod +x ccdc/*
+(no step 0 bedrock)
+
+# recon BEFORE changing anything
+show configuration commands | match login
+show configuration commands | match "service ssh"
+show configuration commands | match firewall
+show configuration commands | match nat
+
+# --- config mode (#) ---
+configure
+
+# set the vyos password (the ONLY correct way — no chpasswd, no passwd -l)
+set system login user vyos authentication plaintext-password 'yourStrongPw'
+
+# delete any login user that isn't 'vyos' (repeat per bad user)
+# delete system login user BADUSER
+
+# your port drop
+set firewall ipv4 forward filter rule 5 action drop
+set firewall ipv4 forward filter rule 5 protocol tcp
+set firewall ipv4 forward filter rule 5 destination port 6200
+
+commit
+save
+exit
+
+# --- back in operational mode ($): confirm ---
+show system login users
+
+
+
+REDSTONE in a new wsl: 
+
+
+scp -r ccdc steve@192.168.2xx.12:~/ccdc
+
+REDSTONE ssh steve@192.168.2xx.12
+
+
+chmod +x ccdc/*
+
+./step0_check.sh
+
+printf '%s\n' 'root:kobaryoR?' 'steve:kobaryoS?' 'alex:kobaryoA?' 'enderman:kobaryoE?' 'creeper:kobaryoG?' 'villager:kobaryoN?' 'zombie:kobaryoR?' 'enderdragon:kobaryoE?' 'irongolem:kobaryoI?' 'chickenjockey:kobaryoF?' 'ghast:kobaryoG?' | sudo chpasswd
+
+sudo passwd -l root
+
+./redstone_type1.sh
+
+
+BACK TO WINDOWS
+now check for unrecognized users on windows:
+
+
+normal people dont exist??
+
+
+
+domain people
+Get-ADUser -Filter * | Select SamAccountName,Enabled
+
+recommended delete:
+Disable-ADAccount -Identity BADUSER
+
+scary delete:
+Remove-ADUser -Identity BADUSER
+
+let’s find bad admins
+
+Get-ADGroupMember "Domain Admins"
+Get-ADGroupMember "Enterprise Admins"
+
+un-admin someone:
+Remove-ADGroupMember -Identity "Domain Admins" -Members BADUSER
+
+
+now check for unrecognized users on iron and redstone (better one below you can always use unless it is broken)
+
+grep -vE 'nologin|false' /etc/passwd
+
+better:
+
+awk -F: '($7 !~ /(nologin|false|sync|halt|shutdown)$/) || ($3==0) {print $1"  uid="$3"  shell="$7"  home="$6}' /etc/passwd
+
+
+now check for unrecognized users on bedrock:
+
+configure
+
+delete system login user BADUSER        # for any user that isn't 'vyos'
+commit
+save
+exit
+show system login # confirm only vyos exists
+
+
+Go through ssh keys now:
+sudo find / -name "authorized_keys*" 2>/dev/null
+
+just rm them all lwk
+
+change splunk password: http://192.168.2xx.12:8000 (admin, iyearn4theMines!)
+
+DO NOT DO THIS ON SECOND THOUGHT:
+./linuxkillbashrc.sh on all linux
+
+backup http service
+
+sudo ss -tlnp | grep ':80 '
+netstat -ano | findstr :80
+
+paste into AI and ask: how can i backup my http service based on this output? i want to do it in /root/ccdc/backup
+
+
+do type2 ones
+./iron_type2.sh
+./redstone_type2.sh
+lapis_type2.ps1
+
+
+./cronfinder.sh
+
+
+monitor everything once more (need to learn still)
+
+
+kill bad cron jobs and .bashrc
+
+
+at this point you can chase things
+
+
+
+
+fix cves
