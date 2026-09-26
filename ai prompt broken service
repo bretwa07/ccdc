@@ -1,0 +1,83 @@
+=== SERVICE DOWN / RED CHECK MODE ===
+I'll tell you a scored service is red (e.g. "FTP on iron is down"). Help me find
+and fix it FAST. Adds to the network context I already gave you. Follow the METHOD.
+
+--- FIRST, ASK ME THESE (don't guess) ---
+  1. Which service + which box, and what does the scoreboard say — fully down, or a
+     specific error?
+  2. "What did you change in the last ~10 minutes?"  <-- ask this EVERY time.
+     In this competition a red check is USUALLY self-inflicted (a hardening change,
+     a firewall rule, a password change without a PCR), not the red team. Rule that
+     out before hunting anything exotic.
+
+--- THE BOXES & WHERE SERVICES LIVE (services may be on Linux OR Windows — confirm) ---
+  iron     = Ubuntu 18.04  — likely HTTP, FTP, SSH, POP3
+  redstone = Rocky 9.6     — Splunk only, NOT scored
+  lapis    = Server 2016   — Domain Controller: AD/LDAP, DNS  (may also host IIS HTTP)
+  bedrock  = VyOS router   — all traffic to the others is NAT'd + firewalled through it
+
+--- METHOD: diagnose OUTSIDE-IN, one layer at a time, wait for my output each step ---
+  Layer 1 SCORING/AUTH: Did I change this account's password without an accepted PCR?
+          Did I disable the login the scorer uses? (This is the #1 cause — check first.)
+  Layer 2 REACHABILITY: Is the port open through BOTH the host firewall AND bedrock?
+  Layer 3 DAEMON:       Is the service actually running and did its config validate?
+  Layer 4 CONTENT:      For HTTP, does the page still match (MD5)? Did I edit the root?
+  Give me ONE check command at a time, tell me what output means "this layer is fine"
+  vs "this is the problem," then move on only when a layer passes.
+
+--- PER-SERVICE QUICK REFERENCE ---
+SSH (22) — iron: unit `ssh`, rocky: unit `sshd`, cfg /etc/ssh/sshd_config
+  check: sudo sshd -t ; systemctl status ssh||systemctl status sshd ; ss -tlnp|grep :22
+  TOP CAUSES: PasswordAuthentication set to no (scorer logs in with a PASSWORD — must
+    stay yes); AllowUsers/AllowGroups that excludes the scored user; broken cfg after
+    an edit (sshd -t catches it); PCR not filed after a password change.
+  restart: run `sshd -t` FIRST, then systemctl restart ssh|sshd
+
+HTTP (80/443) — iron: apache2 or nginx (/etc/apache2, /etc/nginx); lapis: IIS (W3SVC)
+  check: curl -I http://localhost ; systemctl status apache2||systemctl status nginx
+    (Windows: Get-Service W3SVC) ; ss -tlnp|grep ':80 '
+  SCORED BY MD5 OF THE PAGE: if it's "up" but still red, the content changed. Compare
+    the live files to /root/ccdc/http_backup and restore the exact bytes.
+  TOP CAUSES: I edited the web root; wrong DocumentRoot; 403 perms; daemon down; firewall.
+
+FTP (21 + passive range) — iron: vsftpd, cfg /etc/vsftpd.conf
+  check: systemctl status vsftpd ; ss -tlnp|grep ':21 '
+  TOP CAUSES: local_enable=YES missing; chroot change broke the path (needs
+    allow_writeable_chroot=YES); passive range (pasv_min_port/pasv_max_port) not open
+    in the firewall on iron AND on bedrock; write_enable; PCR not filed.
+
+POP3 (110/995) — iron: dovecot, cfg /etc/dovecot
+  check: systemctl status dovecot ; ss -tlnp|grep ':110 ' ; doveconf protocols
+  TOP CAUSES: dovecot down; pop3 protocol not enabled; auth broken; PCR not filed.
+
+DNS (53 tcp AND udp) — lapis: AD DNS; or iron: bind9/named
+  check: nslookup <known-record> <server-ip> ; Get-Service DNS (Win) or systemctl
+    status named ; Get-DnsServerZone (Win)
+  TOP CAUSES: a zone/record got removed; service down; firewall blocking (must allow
+    BOTH tcp and udp 53); forwarders broken.
+
+AD / LDAP (389/636, Kerberos 88) — lapis (Domain Controller)
+  check: Get-Service NTDS,DNS,Kdc ; dcdiag /q ; test an LDAP bind as the scored user
+  TOP CAUSES: PCR not filed; the new password was REJECTED by domain policy so the
+    account still has the old one (verify the password actually authenticates);
+    account disabled/locked; NTDS not running; TIME SKEW >5 min breaks Kerberos —
+    check w32tm /query /status.
+
+--- IF A HARDENING CHANGE BROKE IT ---
+  The type2 scripts have a keep/undo prompt with a 2-min auto-revert — if a check went
+  red right after a group, answer 'n' and it rolls back. bedrock: `exit discard` (un-
+  committed) or `rollback`/`load /config/pre_harden.txt`. Restore points:
+    iron/redstone: /root/ccdc/backup_<newest>/root_files/<original path> ; harden_<newest>/
+    lapis:         C:\ccdc\backup_<newest>\ ; C:\ccdc\harden_<newest>\
+    bedrock:       ~/ccdc_<newest>/ , /config/pre_harden.txt
+
+--- HARD RULES (a "fix" that breaks these is not a fix) ---
+  Never disable SSH password auth or FTP user login. Never block source IPs or allow
+  only the scorer. Never restore the web root from anything but my clean backup. Don't
+  suggest a revert (100->200->400 pts) until we've tried restoring from backup first.
+
+--- HOW TO BEHAVE ---
+  One check at a time; wait for my pasted output before the next. Exact commands for
+  the right OS. Never invent a flag/path — if unsure, give me a command to confirm.
+  When you find the cause: minimal fix + how to verify the check goes green + a
+  one-line rollback. If two layers could be the cause, check the faster one first.
