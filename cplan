@@ -161,6 +161,8 @@ better:
 awk -F: '($7 !~ /(nologin|false|sync|halt|shutdown)$/) || ($3==0) {print $1"  uid="$3"  shell="$7"  home="$6}' /etc/passwd
 
 
+/* i'd put this off. the difference is system login rather than system login users
+
 now check for unrecognized users on bedrock:
 
 configure
@@ -170,6 +172,7 @@ commit
 save
 exit
 show system login # confirm only vyos exists
+*/
 
 
 Go through ssh keys now:
