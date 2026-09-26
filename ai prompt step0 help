@@ -1,0 +1,67 @@
+=== STEP 0 (CREDENTIAL-LOGGER CHECK) TRIAGE MODE ===
+I run step0_check (.sh on Linux, .ps1 on Windows) BEFORE typing any new password. It
+changes nothing and prints [CLEAN] or [CHECK] lines + a RESULT. I'll paste the output;
+walk me through it item by item. Adds to the network context I already gave you.
+
+--- THE GOLDEN RULE ---
+Never type or change a password on a box until every CAPTURE-RISK [CHECK] is fixed AND
+step0 has been re-run and comes back clean for that item. If a logger is live, changing
+the password just hands the attacker the new one — and the PCR I file makes it official.
+
+--- SORT EVERY [CHECK] INTO ONE OF TWO BUCKETS ---
+BUCKET A = STOP. It can intercept the password as I type/change it. Fix it NOW, re-run
+           step0, THEN change the password. Do NOT defer these to the type1 script —
+           type1 runs AFTER the password change, which is too late for a capture risk.
+BUCKET B = PROCEED. It exposes creds already in memory but does not intercept the change
+           itself. Safe to change the password now; note it for type1/type2 to clean up.
+
+IMPORTANT: the type1 scripts auto-fix ONLY two of these — WDigest (Windows) and
+/etc/ld.so.preload (Linux). Everything else step0 flags is a MANUAL fix. And even
+ld.so.preload is a capture risk, so remove it now rather than waiting for type1.
+
+--- LINUX step0 items ---
+[CHECK] /etc/ld.so.preload exists      -> BUCKET A. Injected into every binary; can log
+        passwd. Back it up, `rm /etc/ld.so.preload`, re-run step0. (type1 also removes it,
+        but not in time — do it now.)
+[CHECK] PAM pam_exec/expose_authtok / sufficient pam_permit
+                                       -> BUCKET A, most careful. pam_exec/expose_authtok
+        grabs the password during auth. Fix by hand in /etc/pam.d — KEEP A SECOND ROOT
+        SHELL OPEN (a bad PAM edit locks you out). Remove the malicious line, test login
+        in the second shell, re-run step0.
+[CHECK] sudo log_input / iolog         -> BUCKET A. I change passwords via `sudo chpasswd`,
+        so sudo I/O logging captures them. Remove the log_input/iolog directive from
+        /etc/sudoers(.d) with `visudo`, re-run step0.
+[CHECK] suspicious alias/function/PROMPT_COMMAND (sudo/passwd/chpasswd/ssh/su)
+                                       -> BUCKET A, usually quick. A wrapper is shadowing
+        the real command. Easiest safe fix: open a CLEAN shell and use absolute paths so
+        no session hook applies — `env -i /bin/bash --noprofile --norc`, then
+        `/usr/sbin/chpasswd`, `/usr/bin/sudo`. Then re-run step0.
+[CHECK] sudo/chpasswd/passwd resolves to a non-standard path
+                                       -> BUCKET A. A trojan earlier in $PATH is
+        intercepting. Find/remove it, or use the absolute real-binary path as above, re-run.
+[CHECK] sshd/sudo/pam binary differs from package ('5' lines)
+                                       -> BUCKET A, most serious. The auth binary itself is
+        trojaned. Reinstall ONLY that package (targeted, not a full upgrade), e.g.
+        `apt install --reinstall openssh-server` / `dnf reinstall sudo`. Re-run step0;
+        if it's still dirty, treat the box as deeply compromised.
+
+--- WINDOWS step0 items ---
+[CHECK] LSA Notification Packages has extras (password filter)
+                                       -> BUCKET A, the big one. A password-filter DLL gets
+        EVERY password change in cleartext. Remove the rogue name from the multi-string
+        value, delete the DLL, and REBOOT (it stays loaded in LSASS until reboot). Only
+        after reboot + a clean re-check do I change any password.
+[CHECK] mimilsa.log exists (mimikatz SSP)   -> BUCKET A. A credential-logging SSP is live.
+        Remove it from LSA Security Packages, delete mimilsa.log + the DLL, REBOOT, re-check.
+[CHECK] LSA Security Packages has extras     -> BUCKET A. Same treatment as above (reboot).
+[CHECK] PowerShell transcription is ON       -> BUCKET A, quick. I run `net user` in
+        PowerShell, so transcription writes my new passwords to its output dir. Turn it off
+        (remove the Transcription policy key / EnableTranscripting=0), note the OutputDir to
+        clean later, re-run step0.
+[CHECK] WDigest UseLogonCredential = 1        -> BUCKET B. Exposes cached creds in memory
+        but doesn't intercept the change. Set it to 0 now (one reg line) if easy — and
+        type1 sets it to 0 anyway. Not a reason to hold up the password change.
+
+--- HOW TO BEHAVE ---
+Go item by item. For each [CHECK]: name the bucket, why, the exact fix command for the
+right OS, and "re-run step0 to
