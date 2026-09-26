@@ -79,7 +79,7 @@ show configuration commands | match nat
 configure
 
 # set the vyos password (the ONLY correct way — no chpasswd, no passwd -l)
-set system login user vyos authentication plaintext-password 'yourStrongPw'
+set system login user vyos authentication plaintext-password 'kobaryoR?'
 
 # delete any login user that isn't 'vyos' (repeat per bad user)
 # delete system login user BADUSER
