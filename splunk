@@ -1,0 +1,45 @@
+Here's a "no Splunk knowledge required" kit. First, the only three things you need to actually run a search:
+
+1. Open **Apps → Search & Reporting**, and use the search bar.
+2. Set the **time picker** (top-right) to **Last 60 minutes** (or "Last 15" during an active hunt). This is the #1 gotcha — Splunk defaults to a narrow window and you'll think "nothing's happening."
+3. Paste a search, hit enter. The **left sidebar** lists fields — click one (like `host` or `user`) to see its top values without writing anything.
+
+## The one general search to paste
+This single query surfaces the stuff red team actually does — logins (success + fail), new accounts, privilege grants, and new services — across both Linux and Windows, without you needing to know any field names:
+
+```
+index=* ("failed password" OR "invalid user" OR "authentication failure" OR "Accepted password" OR "Accepted publickey" OR useradd OR "new user" OR "sudo:" OR EventCode=4624 OR EventCode=4625 OR EventCode=4720 OR EventCode=4728 OR EventCode=4732 OR EventCode=4672 OR EventCode=7045)
+```
+
+Then, to turn the firehose into a readable summary, tack this on the end:
+```
+| stats count by host, user, src | sort -count
+```
+(If a field like `user` or `src` shows blank, that log just didn't have it — ignore it.)
+
+## First thing to run (confirms forwarding even works)
+```
+index=* | stats count by host, sourcetype
+```
+If iron and lapis show up as hosts, forwarding is working. If a box is missing, its forwarder is down — that's a finding by itself.
+
+## Small targeted cheat sheet (narrow when something looks off)
+| What you're hunting | Paste this |
+|---|---|
+| Brute force / failed logins | `index=* (EventCode=4625 OR "failed password" OR "invalid user")` |
+| Successful logins (attacker got in) | `index=* (EventCode=4624 OR "Accepted password" OR "Accepted publickey")` |
+| New account created | `index=* (EventCode=4720 OR useradd OR "new user")` |
+| Added to admin group (privesc) | `index=* (EventCode=4728 OR EventCode=4732 OR EventCode=4756)` |
+| New Windows service (persistence) | `index=* EventCode=7045` |
+| Spikes over time (visual) | `index=* \| timechart count by host` |
+| Everything from one box, newest first | `index=* host=iron \| sort -_time` |
+
+## How to read results without knowing Splunk
+- Results are newest-first by default; scan the top.
+- **Click a field on the left** (e.g. `user`) → it shows top values + counts. A username you don't recognize logging in = investigate.
+- Add `| stats count by host, user` to any search to collapse thousands of lines into a short table.
+- The **Windows EventCodes** are the reliable signal (they mean the same thing every time): **4625** fail, **4624** success, **4720** new user, **4728/4732** added to admin group, **4672** admin privileges used, **7045** new service. Memorize those six and you can hunt Windows without knowing anything else.
+
+One tip for the comp: keep the **general search running on "Last 15 minutes"** in one browser tab and just re-run it every few minutes. It's your early-warning radar — a burst of 4625s means a brute force, a 4720 you didn't create means red team made an account, a 7045 you didn't install means persistence. And log anything you spot into your IR doc with the timestamp Splunk shows.
+
+If you want, I can turn this into a one-page `SPLUNK_CHEATSHEET.md` for the repo alongside the other prompts — same as the rest.
